@@ -1,3 +1,21 @@
+dh-cargo (17) unstable; urgency=medium
+
+  * Use --link-from-system from the newer debian-cargo-wrapper.
+
+ -- Ximin Luo <infinity0@debian.org>  Thu, 24 Jan 2019 01:28:43 -0800
+
+dh-cargo (16) unstable; urgency=medium
+
+  * Make detection of rust_libs in dh-cargo-built-using work again.
+
+ -- Ximin Luo <infinity0@debian.org>  Mon, 21 Jan 2019 00:05:53 -0800
+
+dh-cargo (15) unstable; urgency=medium
+
+  * Use source package names in *Built-Using.
+
+ -- Ximin Luo <infinity0@debian.org>  Sun, 20 Jan 2019 17:40:12 -0800
+
 dh-cargo (14) unstable; urgency=medium
 
   * Use absolute path when dpkg-searching for libs.
