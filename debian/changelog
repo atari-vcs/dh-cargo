@@ -1,3 +1,13 @@
+dh-cargo (17co1) apertis; urgency=medium
+
+  [ Ximin Luo ]
+  * Import Debian version 14
+
+  [ Ritesh Raj Sarraf ]
+  * debian/apertis/component: Set to development
+
+ -- Emanuele Aina <emanuele.aina@collabora.com>  Sun, 14 Feb 2021 07:45:40 +0000
+
 dh-cargo (17) unstable; urgency=medium
 
   * Use --link-from-system from the newer debian-cargo-wrapper.
