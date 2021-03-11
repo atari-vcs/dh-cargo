@@ -31,17 +31,24 @@ pkg_has_srcleft_license() {
 	fi
 }
 
-rust_libs() {
-	cat "$CARGO_TARGET_DIR/deps"/*.d \
-	| sed -nre 's	^\S*/('"$CARGO_REGISTRY"'/[^/]*)/.*	'"$(readlink -f "$PWD")/"'\1	gp' \
-	| sort -u \
-	| xargs -r readlink -f \
-	| xargs -r dpkg -S \
+dep_files_to_pkgs() {
+	xargs -r dpkg -S \
 	| sed -nre 's	(.*): .*	\1	gp' \
 	| xargs -r dpkg-query --show \
 	| while read pkg ver; do echo "$pkg $ver $(pkg_has_srcleft_license "${pkg%:*}" "$ver")"; done
 	# pkg_has_srcleft_license should be accurate for all rust crates, no need to give a $containing_crate
 	# this is due to nature of crate copyright info, and the debian rust packaging policy
+}
+
+rust_dep_files() {
+	cat "$CARGO_TARGET_DIR/deps"/*.d \
+	| sed -nre 's	^\S*/('"$CARGO_REGISTRY"'/[^/]*)/.*	'"$(readlink -f "$PWD")/"'\1	gp' \
+	| sort -u \
+	| xargs -r readlink -f
+}
+
+rust_libs() {
+	{ which rustc; rust_dep_files; } | dep_files_to_pkgs
 }
 
 gcc_default_searchdirs() {
@@ -89,6 +96,11 @@ native_libs() {
 				srcleft="${srcstat%%=*}"
 				libfile="${srcstat#*=}"
 				if [ "$(readlink -f "$libfile")" = "$(readlink -f "$PWD")" ]; then
+					# Note that this exception only applies in the case that where you are building
+					# the Debian package for $containing_crate itself. In the case where you are
+					# building a Debian package for crate X depending on $containing_crate, the
+					# latter still has to output the dh-cargo:deb-built-using in their build.rs so
+					# that the Debian package for crate X can correctly set Built-Using themselves.
 					echo >&2 "$0: static library derived from $libfile which is the top-level crate being built, no need to add Built-Using"
 					continue
 				fi
@@ -142,11 +154,12 @@ output() {
 		local built_using_x=""
 		while read pkg ver srcleft; do
 			local src="$(dpkg-query -f '${source:Package}' --show "$pkg")"
+			local srcver="$(dpkg-query -f '${source:Version}' --show "$pkg")"
 			case "$srcleft" in
 			2)	exit 1;;
-			1)	built_using="${built_using}$src (= $ver), ";;
+			1)	built_using="${built_using}$src (= $srcver), ";;
 			esac
-			built_using_x="${built_using_x}$src (= $ver), "
+			built_using_x="${built_using_x}$src (= $srcver), "
 		done
 		echo "cargo:Built-Using=${built_using%, }" >> "debian/$binpkg.substvars"
 		echo "cargo:X-Cargo-Built-Using=${built_using_x%, }" >> "debian/$binpkg.substvars"

@@ -1,5 +1,20 @@
 # debhelper buildsystem for Rust crates using Cargo
 #
+# This builds Debian rust crates to be installed into a system-level
+# crate registry in /usr/share/cargo/registry containing crates that
+# can be used and Build-Depended upon by other Debian packages. The
+# debcargo(1) tool will automatically generate Debian source packages
+# that uses this buildsystem and packagers are not expected to use this
+# directly which is why the documentation is poor.
+#
+# If you have a multi-language program such as firefox or librsvg that
+# includes private Rust crates or libraries not exposed to others, you
+# should instead use our cargo wrapper, in /usr/share/cargo/bin/cargo,
+# which this script also uses. That file contains usage instructions.
+# You then should define a Build-Depends on cargo and not dh-cargo.
+# The Debian cargo package itself also uses the wrapper as part of its
+# own build, which you can look at for a real usage example.
+#
 # Josh Triplett <josh@joshtriplett.org>
 # Ximin Luo <infinity0@debian.org>
 
@@ -123,6 +138,7 @@ sub configure {
     my $this=shift;
     doit("cp", $this->get_sourcepath("debian/cargo-checksum.json"),
                $this->get_sourcepath(".cargo-checksum.json"));
+    doit("rm", "-f", $this->get_sourcepath("Cargo.lock"));
     doit("/usr/share/cargo/bin/cargo", "prepare-debian", "debian/cargo_registry", "--link-from-system");
 }
 
@@ -148,7 +164,7 @@ sub test {
 sub install {
     my $this=shift;
     my $destdir=shift;
-    my $crate = $this->{crate} . '-' . $this->{version};
+    my $crate = $this->{crate} . '-' . ($this->{version} =~ tr/~/-/r);
     if ($this->{libpkg}) {
         my $target = $this->get_sourcepath("debian/" . $this->{libpkg} . "/usr/share/cargo/registry/$crate");
         my @sources = $this->get_sources();
@@ -166,7 +182,8 @@ sub install {
     }
     if ($this->{binpkg}) {
         # Do the install
-        doit("env", "DEB_CARGO_PACKAGE=$this->{binpkg}",
+        my $destdir = $ENV{'DESTDIR'} || $this->get_sourcepath("debian/" . $this->{binpkg});
+        doit("env", "DESTDIR=$destdir",
              "/usr/share/cargo/bin/cargo", "install", @_);
         # generate Built-Using fields
         doit("/usr/share/cargo/bin/dh-cargo-built-using", $this->{binpkg});
@@ -175,6 +192,7 @@ sub install {
 
 sub clean {
     my $this=shift;
+    doit("touch", "--no-create", "-d@" . $ENV{SOURCE_DATE_EPOCH}, ".cargo_vcs_info.json");
     doit("/usr/share/cargo/bin/cargo", "clean", @_);
     doit("rm", "-rf", $this->get_sourcepath(".cargo-checksum.json"));
     doit("rm", "-rf", "debian/cargo_registry");

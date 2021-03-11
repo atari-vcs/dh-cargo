@@ -1,3 +1,65 @@
+dh-cargo (24apertis0) apertis; urgency=medium
+
+  * Sync from Debian debian/bullseye.
+
+ -- Apertis CI <devel@lists.apertis.org>  Thu, 11 Mar 2021 21:19:40 +0000
+
+dh-cargo (24) unstable; urgency=medium
+
+  * Install pre-release versions in the right place so autopkgtest finds them.
+  * Add some brief documentation for cargo.pm
+
+ -- Ximin Luo <infinity0@debian.org>  Mon, 20 Apr 2020 21:30:03 +0100
+
+dh-cargo (23) unstable; urgency=medium
+
+  * cargo-auto-test: ignore some false positive test failures
+  * Drop support for dh_auto_test --destdir, it doesn't meet our requirements.
+    Instead, offer DESTDIR as an alternative.
+
+ -- Ximin Luo <infinity0@debian.org>  Tue, 07 Jan 2020 21:33:41 +0000
+
+dh-cargo (22) unstable; urgency=medium
+
+  * Drop DEB_CARGO_PACKAGE in favour of DESTDIR. (Closes: #946616)
+
+ -- Ximin Luo <infinity0@debian.org>  Mon, 06 Jan 2020 21:37:09 +0000
+
+dh-cargo (21) unstable; urgency=medium
+
+  * Use source versions (without rebuild +bX suffixes) in Built-Using.
+    (Closes: #939016)
+
+ -- Ximin Luo <infinity0@debian.org>  Thu, 05 Sep 2019 00:43:33 -0700
+
+dh-cargo (20) unstable; urgency=medium
+
+  * Remove Cargo.lock since this prevents us from upgrading stuff.
+  * Add the version of rustc to *Built-Using d/control fields.
+
+ -- Ximin Luo <infinity0@debian.org>  Thu, 15 Aug 2019 18:17:00 -0700
+
+dh-cargo (19) unstable; urgency=medium
+
+  * Team upload
+
+  [ Gianfranco Costamagna ]
+  * Apply fix from Ximin Luo to use SOURCE_DATE_EPOCH for the touch command, to
+    avoid breaking reproducible builds
+
+  [ Dimitri John Ledkov ]
+  * Touch .cargo_vcs_info.json to update timestamp, as otherwise the file
+    has unix creation time of 0 which is rejected by the archive in the
+    .deb.s (Closes: #932172)
+
+ -- Sylvestre Ledru <sylvestre@debian.org>  Tue, 16 Jul 2019 10:39:05 +0200
+
+dh-cargo (18) unstable; urgency=medium
+
+  * Add cargo-auto-test to prepare for running autopkgtests.
+
+ -- Ximin Luo <infinity0@debian.org>  Sun, 17 Mar 2019 21:09:30 -0700
+
 dh-cargo (17co1) apertis; urgency=medium
 
   [ Ximin Luo ]
